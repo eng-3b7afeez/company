@@ -1,3 +1,4 @@
+from tkinter import filedialog
 import ttkbootstrap as ttk
 from ttkbootstrap.validation import (
     add_text_validation,
@@ -5,7 +6,7 @@ from ttkbootstrap.validation import (
     add_option_validation,
 )
 from ..utils import EntryLabelFrame, ComboLabelFrame, CheckboxLabelFrame
-
+from ..logger import logger
 
 class OperationCreateForm(ttk.Frame):
     def __init__(self, parent, api):
@@ -27,15 +28,17 @@ class OperationCreateForm(ttk.Frame):
         self.amount = ttk.DoubleVar(value=0.0)
         self.laser_cut = ttk.BooleanVar(value=True)
         self.is_active = ttk.BooleanVar(value=True)
+        self.file_path = ttk.StringVar(value="")
         self.customers = self.api.get(endpoint="customers/")[1]
+
 
     def initialize_frames(self):
         self.label_frame = ttk.LabelFrame(self, text="New Operation")
         self.customer_frame = ComboLabelFrame(
-            self.label_frame, text_varialble=self.customer, values=[customer["name"] for customer in self.customers]
+            self.label_frame, text_variable=self.customer, values=[customer["name"] for customer in self.customers]
         )
         self.material_frame = ComboLabelFrame(
-            self.label_frame, text_varialble=self.material, values=["ST", "SUS", "AL", "BR",]
+            self.label_frame, text_variable=self.material, values=["ST", "SUS", "AL", "BR",]
         )
         self.material_from_storage_frame = CheckboxLabelFrame(
             self.label_frame, text="Material From Store", variable=self.material_from_storage
@@ -61,6 +64,8 @@ class OperationCreateForm(ttk.Frame):
         self.laser_cut_frame = CheckboxLabelFrame(
             self.label_frame, text="Laser Machine", variable=self.laser_cut
         )
+        self.file_button_frame = ttk.Frame(self.label_frame)
+        self.file_button = ttk.Button(self.file_button_frame, text="open file", command=self.open_file)
         self.buttons_frame = ttk.Frame(self.label_frame)
         self.submit_button = ttk.Button(
             self.buttons_frame, text="Create", command=self.submit_data, width=20
@@ -71,12 +76,18 @@ class OperationCreateForm(ttk.Frame):
 
     def layout(self):
         self.label_frame.place(relx=0.33, rely=0.05, relwidth=0.33, relheight=0.9)
+        self.file_button.pack()
+        self.file_button_frame.pack(fill="x", pady=20)
         self.submit_button.pack(side="left", anchor="w", padx=20)
         self.cancel_button.pack(side="right", anchor="e", padx=20)
-        self.buttons_frame.pack(fill="x", pady=50)
+        self.buttons_frame.pack(fill="x", pady=20)
 
     def input_validation(self):
         pass
+
+    def open_file(self):
+        file_path = filedialog.askopenfile(initialdir="E:/WORK SETALCO")
+        self.file_path.set(value=file_path.name)
 
     def get_customer_id(self):
         for customer in self.customers:
@@ -90,7 +101,7 @@ class OperationCreateForm(ttk.Frame):
                 return user.get("id")
 
     def submit_data(self):
-        self.data = {
+        data = {
             "material": self.material.get(),
             "material_from_storage": self.material_from_storage.get(),
             "width": self.width.get(),
@@ -100,12 +111,19 @@ class OperationCreateForm(ttk.Frame):
             "amount": self.amount.get(),
             "laser_cut": self.laser_cut.get(),
             "is_active": self.is_active.get(),
+            "file_path": self.file_path.get(),
             "user": self.get_user_id(),
             "customer": self.get_customer_id()
+
         }
-        req = self.api.post(endpoint="operations/", data=self.data)
-        if req[0] in range(300):
-            self.cancel()
+        my_logger = logger("operation_create.log")
+        try:
+            req = self.api.post(endpoint="operations/", data=data)
+            if req[0] in range(300):
+                my_logger.info(f"operation created successfully for customer {self.customer.get()}")
+                self.cancel()
+        except Exception as e:
+            my_logger.exception(f"something went wrong: {e}")
 
     def cancel(self):
         self.pack_forget()

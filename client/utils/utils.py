@@ -5,7 +5,7 @@ from ..app.settings import FONT, SMALL_FONT
 
 
 class ComboLabelFrame(ttk.Frame):
-    def __init__(self, parent, text_varialble, values):
+    def __init__(self, parent, text_variable, values):
         super(ComboLabelFrame, self).__init__(parent)
         self.label = ttk.Label(
             self, text="Material:", font=f"{FONT} {SMALL_FONT}", justify="left"
@@ -14,7 +14,7 @@ class ComboLabelFrame(ttk.Frame):
         self.combo = ttk.Combobox(
             self,
             values=values,
-            textvariable=text_varialble,
+            textvariable=text_variable,
             font=f"{FONT} {SMALL_FONT}",
         )
         self.combo.pack(side="right", anchor="e", padx=20)

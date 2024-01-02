@@ -5,12 +5,13 @@ from ttkbootstrap.validation import (
     add_option_validation,
 )
 from ..utils import EntryLabelFrame
+from ..logger import logger
 
 
 class CustomerCreateForm(ttk.Frame):
     def __init__(self, parent, api):
         super(CustomerCreateForm, self).__init__(master=parent)
-        self.api=api
+        self.api = api
         self.initialize_vars()
         self.initialize_frames()
         self.layout()
@@ -23,6 +24,7 @@ class CustomerCreateForm(ttk.Frame):
         self.company = ttk.StringVar()
         self.rating = ttk.IntVar(value=6)
         self.comment = ttk.StringVar()
+
 
     def initialize_frames(self):
         self.label_frame = ttk.LabelFrame(self, text="New Customer")
@@ -67,7 +69,7 @@ class CustomerCreateForm(ttk.Frame):
         add_text_validation(self.comment_frame.entry, when="focusout")
 
     def submit_data(self):
-        self.data = {
+        data = {
             "name": self.name.get(),
             "mobile": self.mobile.get(),
             "mobile2": self.mobile2.get(),
@@ -75,15 +77,21 @@ class CustomerCreateForm(ttk.Frame):
             "rating": int(self.rating.get()),
             "comment": self.comment.get(),
         }
-        req = self.api.post(endpoint="customers/", data=self.data)
-        if req[0] in range(300):
-            self.name.set("")
-            self.mobile.set("")
-            self.mobile2.set("")
-            self.company.set("")
-            self.rating.set(6)
-            self.comment.set("")
-            self.cancel()
+        my_logger = logger("customer_create.log")
+        try:
+            req = self.api.post(endpoint="customers/", data=data)
+            if req[0] in range(300):
+                my_logger.info(f"customer : {self.name.get()} has been added to database")
+                self.name.set("")
+                self.mobile.set("")
+                self.mobile2.set("")
+                self.company.set("")
+                self.rating.set(6)
+                self.comment.set("")
+                self.cancel()
+
+        except Exception as e:
+            my_logger.exception(f"something went wrong: {e}")
 
     def cancel(self):
         self.pack_forget()

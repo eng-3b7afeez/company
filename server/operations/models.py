@@ -25,6 +25,7 @@ class Operation(models.Model):
     laser_cut = models.BooleanField(default=True)
     date = models.DateTimeField(auto_now_add=True, editable=True)
     is_active = models.BooleanField(default=True)
+    file_path = models.CharField(max_length=200, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

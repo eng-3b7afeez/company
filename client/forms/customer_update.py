@@ -5,6 +5,7 @@ from ttkbootstrap.validation import (
     add_option_validation,
 )
 from ..utils import EntryLabelFrame
+from ..logger import logger
 
 
 class CustomerUpdateForm(ttk.Frame):
@@ -24,6 +25,7 @@ class CustomerUpdateForm(ttk.Frame):
         self.company = ttk.StringVar(value=self.customer.company)
         self.rating = ttk.IntVar(value=self.customer.rating)
         self.comment = ttk.StringVar(value=self.customer.comment)
+
 
     def initialize_frames(self):
         self.label_frame = ttk.LabelFrame(self, text="Update Customer")
@@ -76,9 +78,14 @@ class CustomerUpdateForm(ttk.Frame):
             "rating": int(self.rating.get()),
             "comment": self.comment.get(),
         }
-        req = self.api.update(endpoint=f"customers/{self.customer.id}/", data=self.data)
-        if req in range(300):
-            self.cancel()
+        my_logger = logger("customer_update.log")
+        try:
+            req = self.api.update(endpoint=f"customers/{self.customer.id}/", data=self.data)
+            if req in range(300):
+                my_logger.info(f"customer : {self.name.get()} has been updated successfully")
+                self.cancel()
+        except Exception as e:
+            my_logger.exception(f"something went wrong: {e}")
 
     def cancel(self):
         self.pack_forget()

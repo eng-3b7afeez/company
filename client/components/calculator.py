@@ -38,7 +38,7 @@ class Calculator(ttk.Frame):
     def initialize_frames(self):
         self.material_frame = ComboLabelFrame(
             self,
-            text_varialble=self.material,
+            text_variable=self.material,
             values=self.material_list,
         )
         self.height_frame = EntryLabelFrame(

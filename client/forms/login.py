@@ -4,6 +4,7 @@ import jwt
 from ..utils import EntryLabelFrame, Toaster
 from ..api import Api
 from ..pages import Main
+from ..logger import logger
 
 
 class Login(ttk.Frame):
@@ -16,6 +17,7 @@ class Login(ttk.Frame):
         self.layout()
         self.username_frame.entry.focus()
         self.initialize_validations()
+        self.logger = logger("login.log")
 
     def initialize_children(self):
         self.main_frame = ttk.LabelFrame(self, text="Login")
@@ -70,13 +72,14 @@ class Login(ttk.Frame):
                 self.master.main.place(
                     relx=0.25, rely=0.12, relwidth=0.73, relheight=0.76
                 )
+                self.logger.info(f"{self.username.get()} has logged in successfully")
                 self.place_forget()
                 self.toaster.toast(
                     title="Login success", message="you've logged in successfully"
                 )
         except Exception as e:
             self.toaster.toast(title="Login problem", message=f"something went wrong while login : {e}")
-
+            self.logger.exception(f"something went wrong: {e}")
     def clear(self):
         self.username.set(value="")
         self.password.set(value="")

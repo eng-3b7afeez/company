@@ -15,5 +15,6 @@ class Operation:
     amount: float
     laser_cut: bool
     is_active: bool
+    file_path: str
     date: str
 
